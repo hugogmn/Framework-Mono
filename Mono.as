@@ -1,16 +1,5 @@
 package Mono
-{
-	import Mono.Console.Console;
-	import Mono.Managers.AssetsManager;
-	import Mono.Managers.InputManager;
-	import Mono.Managers.ScreenManager;
-	import Mono.Managers.UpdateManager;
-	import Mono.Math.MathGeometry;
-	import Mono.Math.MathMatrix;
-	import Mono.Math.MathSimple;
-	import Mono.Visual.Artist;
-	import Mono.Visual.Camera2D;
-	
+{XCZXCZXCZXCZXCZXCZXCZXC
 	import flash.display.Sprite;
 	import flash.display.Stage;
 
