@@ -1,0 +1,180 @@
+package Mono.Controls
+{
+	import Mono.Mono;
+	
+	import flash.events.MouseEvent;
+	import flash.ui.Mouse;
+	import flash.ui.MouseCursor;
+	
+	public class GestureController extends Mono
+	{
+		public var drawing:Boolean;
+		public var px:int;
+		public var py:int;
+		public var px2:int;
+		public var py2:int;
+		public var lastDirection:Number;
+		public var currentDirection:Number=-1;
+		public var movementList:Vector.<String> = new Vector.<String>;
+		public var oldMovementList:Vector.<String>;
+		public var changeMovementList:Vector.<String> = new Vector.<String>;
+		public var oldChangeMovementList:Vector.<String>;
+		
+		/*INSTRUCCIONES PARA UTILIZAR ESTA CLASE:
+		
+		+Inicializarla:
+		Se debe utilizar la función turnOn(); para activar esta clase.
+		
+		+Conseguir información:
+			- movementList / Lista de movimientos activa donde se pueden repetir los casos. Es un vector y la última posición del vector es la última posición de la dirección.
+			- oldMovementList / Lista de movimientos anterior donde se pueden repetir los casos. Es un vector y la última posición del vector es la última posición de la dirección.
+			- changeMovementList / Lista de movimientos activa donde no se pueden repetir los casos. Es un vector y la última posición del vector es la última posición de la dirección.
+			- oldChangeMovementList / Lista de movimientos anterior donde no se pueden repetir los casos. Es un vector y la última posición del vector es la última posición de la dirección.
+		*/
+		
+		public function GestureController()
+		{
+			
+		}
+		
+		/** Enciende el detector de gestos. Update: 16/08/2014
+		 * 
+		 * 
+		 *  */
+		public function turnOn():void
+		{
+			Main.mono.um.addCallBack(evUpdate); //Agrega al update manager el update del controlador de gestos
+			Main.mono.mainStage.addEventListener(MouseEvent.MOUSE_DOWN, detectMovement); //Agrega para detectar cuando el usuario comienza a dibujar
+			Main.mono.mainStage.addEventListener(MouseEvent.MOUSE_UP, stopDetectingMovement); //Agrega para detectar cuando el usuario deja de dibujar
+		}
+		
+		/** Apaga el detector de gestos. Update: 16/08/2014
+		 * 
+		 *  */
+		public function turnOff():void
+		{
+			Main.mono.um.removeCallBack(evUpdate); //Remueve al update manager el update del controlador de gestos
+			Main.mono.mainStage.removeEventListener(MouseEvent.MOUSE_DOWN, detectMovement); //Remueve para detectar cuando el usuario comienza a dibujar
+			Main.mono.mainStage.removeEventListener(MouseEvent.MOUSE_UP, stopDetectingMovement); //Remueve para detectar cuando el usuario deja de dibujar
+		}
+		
+		/** enterFrame del detector de gestos. Update: 16/08/2014
+		 * 
+		 * 
+		 *  */
+		private function evUpdate():void
+		{
+			if(drawing) //Si esta dibujando
+			{
+				var dX:int = px - Main.mono.mainStage.mouseX; //Calcula la diferencia en x del mouse con su anterior posición
+				var dY:int = py - Main.mono.mainStage.mouseY; //Calcula la diferencia en y del mouse con su anterior posición
+				var distance:Number = dX*dX+dY*dY; //Calcula la distancia que recorrió
+				if(distance>400) //Si la distancia es mayor a 400
+				{
+					var angle:Number=Math.atan2(dY,dX)*57.2957795; //Calcula el ángulo de la diferencia en x y en y
+					var refinedAngle:Number;
+					var directionString:String;
+					if (angle>=22*-1&&angle<23) { //Calcula si se movió hacia la izquierda
+						refinedAngle=0; //Almacena un redondeo del ángulo
+						movementList.push("left"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=23&&angle<68) {
+						refinedAngle=Math.PI/4; //Almacena un redondeo del ángulo
+						movementList.push("up left"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=68&&angle<113) {
+						refinedAngle=Math.PI/2; //Almacena un redondeo del ángulo
+						movementList.push("up"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=113&&angle<158) {
+						refinedAngle=Math.PI/4*3; //Almacena un redondeo del ángulo
+						movementList.push("up right"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=158||angle<157*-1) {
+						refinedAngle=Math.PI; //Almacena un redondeo del ángulo
+						movementList.push("right"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=157*-1&&angle<112*-1) {
+						refinedAngle=- Math.PI/4*3; //Almacena un redondeo del ángulo
+						movementList.push("down right"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=112*-1&&angle<67*-1) {
+						refinedAngle=- Math.PI/2; //Almacena un redondeo del ángulo
+						movementList.push("down"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					if (angle>=67*-1&&angle<22*-1) {
+						refinedAngle=- Math.PI/4; //Almacena un redondeo del ángulo
+						movementList.push("down left"); //Agrega el movimiento a la lista
+						addToChangeMovement(movementList[movementList.length-1]); //Llama a la función que se fija si debe o no agregar el movimiento a changeMovementList
+					}
+					px2-=Math.sqrt(distance)*Math.cos(refinedAngle); //Modifica la nueva posición en x
+					py2-=Math.sqrt(distance)*Math.sin(refinedAngle); //Modifica la nueva posición en y
+					if (refinedAngle!=lastDirection) { //Si el ángulo redondeado es distinto a la última dirección
+						lastDirection=refinedAngle; //Se modifica la última dirección
+					}
+					else {
+						if (currentDirection!=lastDirection) { //Si la dirección es distinta a la última dirección
+							currentDirection=lastDirection; //Guarda la dirección actual
+						}
+					}
+					px=Main.mono.mainStage.mouseX; //Actualiza la posición en x con el mouse
+					py=Main.mono.mainStage.mouseY; //Actualiza la posición en y con el mouse
+				}
+			}
+		}
+		
+		/** Verifica si se debe o no agregar el movimiento. En caso de tener que agregarse, lo agrega. Update: 16/08/2014
+		 * 
+		 * @param direccion La dirección a agregar.
+		 * 
+		 *  */
+		private function addToChangeMovement(direccion:String):void
+		{
+			if(changeMovementList.length>0) //Pregunta si la lista tiene más de un elemento
+			{
+				if(changeMovementList[changeMovementList.length-1]!=direccion) //Si el último elemento es distinto a el nuevo movimiento
+				{
+					changeMovementList.push(direccion); //Agrega el nuevo movimiento
+				}
+			}
+			else //Si no tiene más de un elemento
+			{
+				changeMovementList.push(direccion); //Agrega a la lista de movimientos el nuevo movimiento
+			}
+		}
+		
+		/** Detecta cuando el usuario esta dibujando. Update: 16/08/2014
+		 * 
+		 * 
+		 *  */
+		private function detectMovement(e:MouseEvent):void
+		{
+			if(!drawing) //Si no estaba ya dibujando
+			{
+				drawing=true; //Avisa que ahora si esta dibujando
+				movementList = new Vector.<String>; //Crea una nueva lista de movimientos
+				changeMovementList = new Vector.<String>; //Crea una nueva lista de movimientos sin repetición
+				px=px2=Main.mono.mainStage.mouseX; //Modifica la posición en px y px2 con la del mouse
+				py=py2=Main.mono.mainStage.mouseY; //Modifica la posición en py y py2 con la del mouse
+			}
+		}
+		
+		/** Detecta cuando el usuario deja de dibujar. Update: 16/08/2014
+		 * 
+		 * 
+		 *  */
+		private function stopDetectingMovement(e:MouseEvent):void
+		{
+			drawing=false; //Avisa que dejo de dibujar
+			oldMovementList = movementList; //Cambia el movimiento viejo con el nuevo
+			oldChangeMovementList = changeMovementList; //Cambia el movimiento viejo con el nuevo
+		}
+	}
+}
