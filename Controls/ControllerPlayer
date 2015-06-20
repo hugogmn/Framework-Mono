@@ -1,0 +1,48 @@
+package Mono.Controls
+{
+	import Mono.Mono;
+	
+	import flash.events.Event;
+	import flash.events.KeyboardEvent;
+
+	public class ControllerPlayer extends Mono
+	{
+
+		public var keys:Array = new Array();
+		
+		/** Inicia la clase ControllerPlayer Update: 16/08/2014
+		 *  
+		 *  */
+		public function ControllerPlayer()
+		{
+			
+		}
+		
+		/** Crea el controller con sus listeners. Para acceder a las keys se utiliza la variable "keys" Update: 17/05/2014
+		 * 
+		 * 
+		 *  */
+		public function crearController()
+		{	
+			Main.mono.mainStage.addEventListener(KeyboardEvent.KEY_DOWN, evKeyDown); // Agrega el listener para saber cuando una tecla esta presionada
+			Main.mono.mainStage.addEventListener(KeyboardEvent.KEY_UP, evKeyUp); //Agrega el listener para saber cuando una tecla esta levantada
+		}
+		
+		/** Controla que teclas fueron presionadas Update: 30/05/2014
+		 * 
+		 * */
+		private function evKeyDown(e:KeyboardEvent):void
+		{
+			keys[e.keyCode] = true; //Avisa que la tecla fue presionada
+		}
+		
+		/** Controla que teclas fueron levantadas Update: 30/05/2014
+		 * 
+		 * */
+		
+		private function evKeyUp(e:KeyboardEvent):void
+		{
+			keys[e.keyCode] = false; //Avisa que la tecla fue levantada	
+		}
+	}
+}
